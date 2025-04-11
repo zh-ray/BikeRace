@@ -1,6 +1,6 @@
 // 等待 DOM 加载完成
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('addRace.js 已加载');
+    // console.log('addRace.js 已加载');
 
     // 获取表格的 tbody 元素
     const tableBody = document.querySelector('table tbody');
