@@ -46,38 +46,37 @@
 </table>
 
 <h3 style="margin-top: 40px;">留言区域（如有纰漏，欢迎留言）</h3>
-<form action="https://formsubmit.co/wxjiooio@gmail.com" method="POST"
-    style="margin-top: 20px; font-family: Arial, sans-serif;" onsubmit="showThankYouPopup(event)">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="hidden" name="_next" value="">
+<form id="feedbackForm" style="margin-top: 20px; font-family: Arial, sans-serif;" onsubmit="submitMessage(event)">
+  <textarea id="message" name="message" rows="5" required style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
 
-    <!-- <label for="message" style="display: block; margin-bottom: 8px;">留言内容:</label> -->
-    <textarea id="message" name="message" rows="5" required
-        style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-
-    <button type="submit"
-        style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">提交留言</button>
+  <button type="submit" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">提交留言</button>
 </form>
 
-<!-- 感谢弹窗 -->
-<div id="thankYouPopup"
-    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; text-align: center;">
-    <p>感谢您的留言！</p>
-</div>
-<div id="overlay"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999;">
-</div>
-
 <script>
-    function showThankYouPopup(event) {
-        event.preventDefault(); // 阻止表单默认提交行为
-        document.getElementById('thankYouPopup').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
+  async function submitMessage(event) {
+    event.preventDefault();
 
-        // 5 秒后跳转到主页
-        setTimeout(() => {
-            window.location.href = '/BikeRace'; // 替换为您的主页链接
-        }, 5000);
+    const message = document.getElementById('message').value;
+
+    try {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbzWycLzfyE5d9uz-1_Vn-KOf6-XnJmfLdfZ5BFI6HkVN2mV66b9hxnYEKyhKG4hrbKt/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      if (response.ok) {
+        alert('留言已成功提交！');
+        document.getElementById('feedbackForm').reset();
+      } else {
+        alert('提交失败，请稍后再试。');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('提交失败，请稍后再试。');
     }
+  }
 </script>
 <script src="addRace.js"></script>
