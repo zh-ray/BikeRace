@@ -55,13 +55,13 @@
 </form>
 
 <script>
-    function submitMessage(event) {
+    async function submitMessage(event) {
         event.preventDefault();
 
         const message = document.getElementById('message').value;
 
         try {
-            const response = fetch('https://script.google.com/macros/s/AKfycbzx9PZHvfjFk7_1_ahxt3HXiyTNf3VEDESL7ydV0Mu2b8r8nyznMon8E_Cdkp-wZ59Q/exec', {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbxplSLZKzxj-jwcZ_irpbYXeACdlHz8K-M5OhtjTfuH3NzBYzQKTADD7kkSjrEQYaAB/exec', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
