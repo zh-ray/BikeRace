@@ -1,7 +1,5 @@
 // 等待 DOM 加载完成
 document.addEventListener('DOMContentLoaded', () => {
-    // console.log('addRace.js 已加载');
-
     // 获取表格的 tbody 元素
     const tableBody = document.querySelector('table tbody');
     if (!tableBody) {
@@ -22,10 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 创建每一列并填充数据
         const columns = [shortName, fullName, location, date, distance, registrationPeriod, fee];
-        columns.forEach((colData) => {
+        columns.forEach((colData, index) => {
             const td = document.createElement('td');
             td.style.border = '1px solid #ddd';
             td.style.padding = '8px';
+
+            // 针对赛事全称字段（第二列）设置自动换行
+            if (index === 1) { // 第二列是赛事全称
+                td.style.maxWidth = '300px'; // 设置最大宽度
+                td.style.whiteSpace = 'normal'; // 允许换行
+                td.style.wordWrap = 'break-word'; // 长单词自动换行
+            }
+
             td.textContent = colData;
             newRow.appendChild(td);
         });
