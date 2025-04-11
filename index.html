@@ -61,10 +61,11 @@
         const message = document.getElementById('message').value;
 
         try {
-            const response = await fetch('https://script.google.com/macros/s/AKfycbxplSLZKzxj-jwcZ_irpbYXeACdlHz8K-M5OhtjTfuH3NzBYzQKTADD7kkSjrEQYaAB/exec', {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbyLa0glpf45HmkF1A_igLwiqsF44VXjcI_f1KgrzZyYAMloDJjGpFRD2f5DMZSGGYjD/exec', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify({ message }),
             });
