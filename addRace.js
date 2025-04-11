@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === 1) { // 第二列是赛事全称
                 td.style.maxWidth = '300px'; // 设置最大宽度
                 td.style.whiteSpace = 'normal'; // 允许换行
-                td.style.wordWrap = 'break-word'; // 长单词自动换行
             }
 
             td.textContent = colData;
