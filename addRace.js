@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 定义一个函数，用于添加比赛条目
-    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl) {
+    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl, roadStatus) {
         const newRow = document.createElement('tr');
 
         // 设置交替行背景色
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 创建每一列并填充数据
-        const columns = [shortName, fullName, location, date, distance, registrationStart];
+        const columns = [shortName, fullName, location, date];
         columns.forEach((colData) => {
             const td = document.createElement('td');
             td.style.border = '1px solid #ddd';
@@ -25,6 +25,35 @@ document.addEventListener('DOMContentLoaded', () => {
             td.textContent = colData;
             newRow.appendChild(td);
         });
+
+        // 创建赛事里程列并添加封路状态
+        const distanceTd = document.createElement('td');
+        distanceTd.style.border = '1px solid #ddd';
+        distanceTd.style.padding = '8px';
+
+        // 设置封路状态颜色
+        let roadStatusText = '';
+        let roadStatusColor = '';
+        if (roadStatus === '1') {
+            roadStatusText = '封闭道路';
+            roadStatusColor = '#f44336'; // 红色
+        } else if (roadStatus === '2') {
+            roadStatusText = '半封闭道路';
+            roadStatusColor = '#FF9800'; // 橙色
+        } else if (roadStatus === '3') {
+            roadStatusText = '无封闭道路';
+            roadStatusColor = '#4CAF50'; // 绿色
+        }
+
+        distanceTd.innerHTML = `${distance} <span style="color: ${roadStatusColor}; font-weight: bold;">(${roadStatusText})</span>`;
+        newRow.appendChild(distanceTd);
+
+        // 创建报名时间列
+        const registrationTd = document.createElement('td');
+        registrationTd.style.border = '1px solid #ddd';
+        registrationTd.style.padding = '8px';
+        registrationTd.textContent = registrationStart;
+        newRow.appendChild(registrationTd);
 
         // 创建是否截至报名列
         const statusTd = document.createElement('td');
@@ -76,16 +105,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rows = csvData.trim().split('\n'); // 按行分割
                 const raceData = rows.slice(1).map((row) => { // 跳过第一行
                     const columns = row.split(','); // 按逗号分割列
-                    if (columns.length >= 7) {
+                    if (columns.length >= 8) {
                         return {
                             shortName: columns[0].trim(),
                             fullName: columns[1].trim(),
                             location: columns[2].trim(),
                             date: columns[3].trim(),
                             distance: columns[4].trim(),
-                            registrationStart: new Date(columns[5].trim()), // 转换为 Date 对象
-                            registrationEnd: new Date(columns[6].trim()),   // 转换为 Date 对象
-                            webUrl: columns[7] ? columns[7].trim() : null // 跳转链接
+                            registrationStart: new Date(columns[5].trim()).toLocaleString(), // 转换为本地时间字符串
+                            registrationEnd: new Date(columns[6].trim()).toLocaleString(),   // 转换为本地时间字符串
+                            webUrl: columns[7] ? columns[7].trim() : null, // 跳转链接
+                            roadStatus: columns[8] ? columns[8].trim() : '1' // 封路状态，默认为封路
                         };
                     }
                     return null;
@@ -96,15 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 2. 同状态下按报名开始时间从大到小排序
                 raceData.sort((a, b) => {
                     const now = new Date();
-                    const aStatus = now > a.registrationEnd ? 1 : 0; // 1 表示已截止，0 表示报名中
-                    const bStatus = now > b.registrationEnd ? 1 : 0;
+                    const aStatus = now > new Date(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
+                    const bStatus = now > new Date(b.registrationEnd) ? 1 : 0;
 
                     if (aStatus !== bStatus) {
                         return aStatus - bStatus; // 报名中在前
                     }
 
                     // 同状态下按报名开始时间从大到小排序
-                    return b.registrationStart - a.registrationStart;
+                    return new Date(b.registrationStart) - new Date(a.registrationStart);
                 });
 
                 // 添加排序后的比赛条目到表格
@@ -115,9 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         race.location,
                         race.date,
                         race.distance,
-                        race.registrationStart.toLocaleString(),
-                        race.registrationEnd.toLocaleString(),
-                        race.webUrl
+                        race.registrationStart,
+                        race.registrationEnd,
+                        race.webUrl,
+                        race.roadStatus
                     );
                 });
             })
