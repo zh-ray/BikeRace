@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             location: columns[2].trim(),
                             date: columns[3].trim(),
                             distance: columns[4].trim(),
-                            registrationStart: new Date(columns[5].trim()).toLocaleString(), // 转换为本地时间字符串
-                            registrationEnd: new Date(columns[6].trim()).toLocaleString(),   // 转换为本地时间字符串
+                            registrationStart: columns[5].trim(), // 格式化报名开始时间
+                            registrationEnd: columns[6].trim(),   // 格式化报名结束时间
                             webUrl: columns[7] ? columns[7].trim() : null, // 跳转链接
                             roadStatus: columns[8] ? columns[8].trim() : '1' // 封路状态，默认为封路
                         };
