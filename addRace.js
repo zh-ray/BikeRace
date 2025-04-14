@@ -1,6 +1,5 @@
 // 等待 DOM 加载完成
 document.addEventListener('DOMContentLoaded', () => {
-    // 获取表格的 tbody 元素
     const tableBody = document.querySelector('table tbody');
     if (!tableBody) {
         console.error('未找到比赛日历表格的 tbody 元素');
@@ -8,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 定义一个函数，用于添加比赛条目
-    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd) {
+    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl) {
         const newRow = document.createElement('tr');
 
         // 设置交替行背景色
@@ -36,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 比较当前时间与报名结束时间
         const now = new Date();
         const endDate = new Date(registrationEnd);
+        let isRegistrationOpen = false;
 
         if (now > endDate) {
             statusTd.textContent = '已截止';
@@ -43,6 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             statusTd.textContent = '报名中';
             statusTd.style.color = '#4CAF50'; // 绿色表示报名中
+            isRegistrationOpen = true; // 报名中状态
+
+            // 如果报名中且有链接，添加“请点击”
+            if (webUrl) {
+                const link = document.createElement('a');
+                link.href = webUrl;
+                link.textContent = '（请点击）';
+                link.target = '_blank'; // 在新标签页中打开链接
+                link.style.color = '#007BFF'; // 设置链接颜色
+                link.style.textDecoration = 'none'; // 去掉下划线
+                statusTd.appendChild(link);
+            }
         }
 
         newRow.appendChild(statusTd);
@@ -73,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             distance: columns[4].trim(),
                             registrationStart: new Date(columns[5].trim()), // 转换为 Date 对象
                             registrationEnd: new Date(columns[6].trim()),   // 转换为 Date 对象
+                            webUrl: columns[7] ? columns[7].trim() : null // 跳转链接
                         };
                     }
                     return null;
@@ -103,7 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         race.date,
                         race.distance,
                         race.registrationStart.toLocaleString(),
-                        race.registrationEnd.toLocaleString()
+                        race.registrationEnd.toLocaleString(),
+                        race.webUrl
                     );
                 });
             })
