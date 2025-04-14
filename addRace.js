@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 定义一个函数，用于添加比赛条目
-    function addRace(shortName, fullName, location, date, distance, registrationPeriod, fee) {
-        // 创建一个新的表格行
+    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd) {
         const newRow = document.createElement('tr');
 
         // 设置交替行背景色
@@ -19,43 +18,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 创建每一列并填充数据
-        const columns = [shortName, fullName, location, date, distance, registrationPeriod, fee];
-        columns.forEach((colData, index) => {
+        const columns = [shortName, fullName, location, date, distance, registrationStart];
+        columns.forEach((colData) => {
             const td = document.createElement('td');
             td.style.border = '1px solid #ddd';
             td.style.padding = '8px';
-
-            // 针对赛事全称字段（第二列）设置自动换行
-            if (index === 1) { // 第二列是赛事全称
-                td.style.maxWidth = '300px'; // 设置最大宽度
-                td.style.whiteSpace = 'normal'; // 允许换行
-            }
-
             td.textContent = colData;
             newRow.appendChild(td);
         });
+
+        // 创建是否截至报名列
+        const statusTd = document.createElement('td');
+        statusTd.style.border = '1px solid #ddd';
+        statusTd.style.padding = '8px';
+        statusTd.style.textAlign = 'center';
+
+        // 比较当前时间与报名结束时间
+        const now = new Date();
+        const endDate = new Date(registrationEnd);
+
+        if (now > endDate) {
+            statusTd.textContent = '已截止';
+            statusTd.style.color = '#f44336'; // 红色表示已截止
+        } else {
+            statusTd.textContent = '报名中';
+            statusTd.style.color = '#4CAF50'; // 绿色表示报名中
+        }
+
+        newRow.appendChild(statusTd);
 
         // 将新行添加到表格中
         tableBody.appendChild(newRow);
     }
 
-    // 示例：添加一个新的比赛条目
-    addRace(
-        'HEROS·黄岩站', // 赛事简称
-        '中国自行车运动骑游大会（湖系列）永宁悦动•2025环长潭湖自行车赛暨HEROS自行车系列赛鸿鲸枫度—黄岩站', // 赛事全称
-        '中国·台州', // 赛事地点
-        '2025.05.18', // 赛事时间
-        '97km', // 赛事长度
-        '2025.04.07 10:00', // 报名时间
-        '198CNY' // 报名费
-    );
-    addRace(
-        'HEROS·千岛湖站', // 赛事简称
-        '中国自行车运动骑游大会（湖系列）第十九届中国环千岛湖公路自行车赛2025环浙步道自行车系列赛（总决赛）', // 赛事全称
-        '中国·淳安', // 赛事地点
-        '2025.11.09', // 赛事时间
-        '136km', // 赛事长度
-        '2025.04.12 10:00', // 报名时间
-        '298CNY' // 报名费
-    );
+    // 定义一个函数，用于加载 CSV 文件
+    function loadCSV(filePath) {
+        fetch(filePath)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`无法加载文件: ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then((csvData) => {
+                const rows = csvData.trim().split('\n'); // 按行分割
+                const raceData = rows.slice(1).map((row) => { // 跳过第一行
+                    const columns = row.split(','); // 按逗号分割列
+                    if (columns.length >= 7) {
+                        return {
+                            shortName: columns[0].trim(),
+                            fullName: columns[1].trim(),
+                            location: columns[2].trim(),
+                            date: columns[3].trim(),
+                            distance: columns[4].trim(),
+                            registrationStart: new Date(columns[5].trim()), // 转换为 Date 对象
+                            registrationEnd: new Date(columns[6].trim()),   // 转换为 Date 对象
+                        };
+                    }
+                    return null;
+                }).filter((item) => item !== null); // 过滤掉无效数据
+
+                // 排序规则：
+                // 1. 报名中在前，已截止在后
+                // 2. 同状态下按报名开始时间从大到小排序
+                raceData.sort((a, b) => {
+                    const now = new Date();
+                    const aStatus = now > a.registrationEnd ? 1 : 0; // 1 表示已截止，0 表示报名中
+                    const bStatus = now > b.registrationEnd ? 1 : 0;
+
+                    if (aStatus !== bStatus) {
+                        return aStatus - bStatus; // 报名中在前
+                    }
+
+                    // 同状态下按报名开始时间从大到小排序
+                    return b.registrationStart - a.registrationStart;
+                });
+
+                // 添加排序后的比赛条目到表格
+                raceData.forEach((race) => {
+                    addRace(
+                        race.shortName,
+                        race.fullName,
+                        race.location,
+                        race.date,
+                        race.distance,
+                        race.registrationStart.toLocaleString(),
+                        race.registrationEnd.toLocaleString()
+                    );
+                });
+            })
+            .catch((error) => {
+                console.error('加载 CSV 文件时出错:', error);
+            });
+    }
+
+    // 加载同目录下的 race.csv 文件
+    loadCSV('./race.csv');
 });
