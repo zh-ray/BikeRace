@@ -7,22 +7,53 @@
     *具体赛事章程以官方为准,补录名额请关注赛事官方通知
 </p>
 
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
-    <thead>
-        <tr style="background-color: #f2f2f2;">
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事简称</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事名称</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事地点</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事时间</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事里程</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">报名时间</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;"></th>
-        </tr>
-    </thead>
-    <tbody>
-        
-    </tbody>
-</table>
+<style>
+    /* 表格容器样式 */
+    div {
+        overflow-x: auto; /* 启用横向滚动 */
+        -webkit-overflow-scrolling: touch; /* 在移动设备上启用平滑滚动 */
+    }
+
+    /* 表格样式 */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    /* 小屏幕优化 */
+    @media (max-width: 768px) {
+        th, td {
+            font-size: 12px; /* 缩小字体 */
+            padding: 6px;    /* 减小内边距 */
+        }
+    }
+</style>
+
+<div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事简称</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事名称</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事地点</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事时间</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事里程</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">报名时间</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 动态生成的表格内容 -->
+        </tbody>
+    </table>
+</div>
 
 <h3 style="margin-top: 40px;">留言区域（如有补充，欢迎留言）</h3>
 <form id="feedbackForm" style="margin-top: 20px; font-family: Arial, sans-serif;" onsubmit="submitMessage(event)">
