@@ -27,11 +27,37 @@
         text-align: left;
     }
 
-    /* 小屏幕优化 */
+    /* 首列加粗字体 */
+    th:first-child, td:first-child {
+        font-weight: bold; /* 字体加粗 */
+    }
+
+    /* 小屏幕优化：隐藏表格，显示卡片 */
     @media (max-width: 768px) {
-        th, td {
-            font-size: 12px; /* 缩小字体 */
-            padding: 6px;    /* 减小内边距 */
+        table {
+            display: none; /* 隐藏表格 */
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+
+        .card h4 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .card p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #555;
         }
     }
 </style>
@@ -87,5 +113,41 @@
             alert('提交失败，请稍后再试。');
         }
     }
+</script>
+<script>
+    function generateCardsFromTable() {
+        const table = document.querySelector('table');
+        const tbody = table.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        const container = document.createElement('div');
+        container.id = 'cardContainer';
+
+        rows.forEach((row) => {
+            const columns = row.querySelectorAll('td');
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            // 动态生成卡片内容
+            card.innerHTML = `
+                <h4>${columns[0].textContent}</h4>
+                <p><strong>赛事名称:</strong> ${columns[1].textContent}</p>
+                <p><strong>赛事地点:</strong> ${columns[2].textContent}</p>
+                <p><strong>赛事时间:</strong> ${columns[3].textContent}</p>
+                <p><strong>赛事里程:</strong> ${columns[4].textContent}</p>
+                <p><strong>报名时间:</strong> ${columns[5].textContent}</p>
+                <p><strong>状态:</strong> ${columns[6].textContent}</p>
+            `;
+
+            container.appendChild(card);
+        });
+
+        // 将卡片容器插入到表格后面
+        table.parentNode.insertBefore(container, table.nextSibling);
+    }
+
+    // 在页面加载完成后生成卡片
+    document.addEventListener('DOMContentLoaded', () => {
+        generateCardsFromTable();
+    });
 </script>
 <script src="addRace.js"></script>
