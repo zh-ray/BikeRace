@@ -6,8 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // 定义一个函数，用于根据赛事类型返回对应的图标
+    function getRaceIcon(raceType) {
+        if (raceType === '2') {
+            return '🔄'; // 绕圈赛
+        } else if (raceType === '3') {
+            return '⛰️'; // 爬坡赛
+        }
+        return '🚴'; // 普通赛事（默认）
+    }
+
     // 定义一个函数，用于添加比赛条目
-    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl, roadStatus) {
+    function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl, roadStatus, raceType) {
         const newRow = document.createElement('tr');
 
         // 设置交替行背景色
@@ -26,10 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
             newRow.appendChild(td);
         });
 
-        // 创建赛事里程列并添加封路状态
+        // 创建赛事里程列并添加封路状态和图标
         const distanceTd = document.createElement('td');
         distanceTd.style.border = '1px solid #ddd';
         distanceTd.style.padding = '8px';
+
+        // 获取赛事类型图标
+        const raceIcon = getRaceIcon(raceType);
 
         // 设置封路状态颜色
         let roadStatusText = '';
@@ -45,7 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
             roadStatusColor = '#4CAF50'; // 绿色
         }
 
-        distanceTd.innerHTML = `${distance} <span style="color: ${roadStatusColor}; font-weight: bold;">(${roadStatusText})</span>`;
+        // 将图标、里程和封路状态组合到一起
+        distanceTd.innerHTML = `${raceIcon} ${distance} <span style="color: ${roadStatusColor}; font-weight: bold;">(${roadStatusText})</span>`;
         newRow.appendChild(distanceTd);
 
         // 创建报名时间列
@@ -105,17 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rows = csvData.trim().split('\n'); // 按行分割
                 const raceData = rows.slice(1).map((row) => { // 跳过第一行
                     const columns = row.split(','); // 按逗号分割列
-                    if (columns.length >= 8) {
+                    if (columns.length >= 10) {
                         return {
                             shortName: columns[0].trim(),
                             fullName: columns[1].trim(),
                             location: columns[2].trim(),
                             date: columns[3].trim(),
                             distance: columns[4].trim(),
-                            registrationStart: columns[5].trim(), // 格式化报名开始时间
-                            registrationEnd: columns[6].trim(),   // 格式化报名结束时间
-                            webUrl: columns[7] ? columns[7].trim() : null, // 跳转链接
-                            roadStatus: columns[8] ? columns[8].trim() : '1' // 封路状态，默认为封路
+                            registrationStart: columns[5].trim(),
+                            registrationEnd: columns[6].trim(),
+                            webUrl: columns[7] ? columns[7].trim() : null,
+                            roadStatus: columns[8] ? columns[8].trim() : '1',
+                            raceType: columns[9] ? columns[9].trim() : '1' // 赛事类型，默认为 1
                         };
                     }
                     return null;
@@ -133,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return aStatus - bStatus; // 报名中在前
                     }
 
-                    // 同状态下按报名开始时间从大到小排序
+                    // 同状态下按比赛日期从大到小排序
                     return new Date(b.date) - new Date(a.date);
                 });
 
@@ -148,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         race.registrationStart,
                         race.registrationEnd,
                         race.webUrl,
-                        race.roadStatus
+                        race.roadStatus,
+                        race.raceType
                     );
                 });
             })
