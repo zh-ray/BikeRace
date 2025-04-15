@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 排序规则：
                 // 1. 报名中在前，已截止在后
                 // 2. 同状态下按比赛日期从大到小排序
+                // 3. 比赛日期相同时，按报名开始日期从大到小排序
                 raceData.sort((a, b) => {
                     const now = new Date();
                     const aStatus = now > new Date(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
@@ -149,7 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // 同状态下按比赛日期从大到小排序
-                    return new Date(b.date) - new Date(a.date);
+                    const dateComparison = new Date(b.date) - new Date(a.date);
+                    if (dateComparison !== 0) {
+                        return dateComparison;
+                    }
+
+                    // 比赛日期相同时，按报名开始日期从大到小排序
+                    return new Date(b.registrationStart) - new Date(a.registrationStart);
                 });
 
                 // 添加排序后的比赛条目到表格
