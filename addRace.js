@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let roadStatusText = '';
         let roadStatusColor = '';
         if (roadStatus === '1') {
-            roadStatusText = '封闭道路';
+            roadStatusText = '全封闭道路';
             roadStatusColor = '#f44336'; // 红色
         } else if (roadStatus === '2') {
             roadStatusText = '半封闭道路';
