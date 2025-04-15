@@ -8,12 +8,6 @@
 </p>
 
 <style>
-    /* 表格容器样式 */
-    div {
-        overflow-x: auto; /* 启用横向滚动 */
-        -webkit-overflow-scrolling: touch; /* 在移动设备上启用平滑滚动 */
-    }
-
     /* 表格样式 */
     table {
         width: 100%;
@@ -21,48 +15,39 @@
         font-family: Arial, sans-serif;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #ddd;
         padding: 8px;
         text-align: left;
     }
 
     /* 首列加粗字体 */
-    th:first-child, td:first-child {
-        font-weight: bold; /* 字体加粗 */
+    th:first-child,
+    td:first-child {
+        font-weight: bold;
+        /* 字体加粗 */
     }
 
     /* 小屏幕优化：隐藏表格，显示卡片 */
     @media (max-width: 768px) {
         table {
-            display: none; /* 隐藏表格 */
+            display: none;
+            /* 隐藏表格 */
         }
 
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
+        .card-container {
+            display: block;
+            /* 显示卡片列表 */
         }
 
-        .card h4 {
-            margin: 0 0 8px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .card p {
-            margin: 4px 0;
-            font-size: 14px;
-            color: #555;
+        body {
+            background: red !important;
         }
     }
 </style>
 
-<div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+<div style="overflow-x: auto;">
     <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
         <thead>
             <tr style="background-color: #f2f2f2;">
@@ -80,6 +65,9 @@
         </tbody>
     </table>
 </div>
+
+<!-- 卡片展示区域 -->
+<div class="card-container" style="display: none;"></div>
 
 <h3 style="margin-top: 40px;">留言区域（如有补充，欢迎留言）</h3>
 <form id="feedbackForm" style="margin-top: 20px; font-family: Arial, sans-serif;" onsubmit="submitMessage(event)">
@@ -113,41 +101,5 @@
             alert('提交失败，请稍后再试。');
         }
     }
-</script>
-<script>
-    function generateCardsFromTable() {
-        const table = document.querySelector('table');
-        const tbody = table.querySelector('tbody');
-        const rows = tbody.querySelectorAll('tr');
-        const container = document.createElement('div');
-        container.id = 'cardContainer';
-
-        rows.forEach((row) => {
-            const columns = row.querySelectorAll('td');
-            const card = document.createElement('div');
-            card.className = 'card';
-
-            // 动态生成卡片内容
-            card.innerHTML = `
-                <h4>${columns[0].textContent}</h4>
-                <p><strong>赛事名称:</strong> ${columns[1].textContent}</p>
-                <p><strong>赛事地点:</strong> ${columns[2].textContent}</p>
-                <p><strong>赛事时间:</strong> ${columns[3].textContent}</p>
-                <p><strong>赛事里程:</strong> ${columns[4].textContent}</p>
-                <p><strong>报名时间:</strong> ${columns[5].textContent}</p>
-                <p><strong>状态:</strong> ${columns[6].textContent}</p>
-            `;
-
-            container.appendChild(card);
-        });
-
-        // 将卡片容器插入到表格后面
-        table.parentNode.insertBefore(container, table.nextSibling);
-    }
-
-    // 在页面加载完成后生成卡片
-    document.addEventListener('DOMContentLoaded', () => {
-        generateCardsFromTable();
-    });
 </script>
 <script src="addRace.js"></script>

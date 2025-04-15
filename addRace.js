@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 定义一个函数，用于加载 CSV 文件
     function loadCSV(filePath) {
-        fetch(filePath)
+        return fetch(filePath)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(`无法加载文件: ${response.statusText}`);
@@ -180,6 +180,48 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // 加载同目录下的 race.csv 文件
-    loadCSV('./race.csv');
+    // 定义一个函数，用于从表格生成卡片
+    function generateCardsFromTable() {
+        const tableRows = tableBody.querySelectorAll('tr');
+        const cardContainer = document.querySelector('.card-container');
+
+        if (!cardContainer) {
+            console.error('未找到卡片容器元素');
+            return;
+        }
+
+        // 清空卡片容器
+        cardContainer.innerHTML = '';
+
+        // 遍历表格行生成卡片
+        tableRows.forEach((row) => {
+            const columns = row.querySelectorAll('td');
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.border = '1px solid #ddd';
+            card.style.padding = '16px';
+            card.style.margin = '8px';
+            card.style.borderRadius = '8px';
+            card.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+
+            // 动态生成卡片内容
+            card.innerHTML = `
+                <h4>${columns[0]?.textContent || '无数据'}</h4>
+                <p><strong>赛事名称:</strong> ${columns[1]?.textContent || '无数据'}</p>
+                <p><strong>赛事地点:</strong> ${columns[2]?.textContent || '无数据'}</p>
+                <p><strong>赛事时间:</strong> ${columns[3]?.textContent || '无数据'}</p>
+                <p><strong>赛事里程:</strong> ${columns[4]?.textContent || '无数据'}</p>
+                <p><strong>报名时间:</strong> ${columns[5]?.textContent || '无数据'}</p>
+                <p><strong>状态:</strong> ${columns[6]?.textContent || '无数据'}</p>
+            `;
+
+            cardContainer.appendChild(card);
+        });
+    }
+
+    // 动态生成表格内容
+    loadCSV('./race.csv').then(() => {
+        // 表格内容生成完成后，生成卡片
+        generateCardsFromTable();
+    });
 });
