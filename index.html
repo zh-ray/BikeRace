@@ -30,7 +30,7 @@
     }
 
     /* 小屏幕优化：隐藏表格，显示卡片 */
-    @media (max-width: 768px) {
+    @media only screen and (max-width: 768px) {
         table {
             display: none;
             /* 隐藏表格 */
@@ -39,10 +39,6 @@
         .card-container {
             display: block;
             /* 显示卡片列表 */
-        }
-
-        body {
-            background: red !important;
         }
     }
 </style>
