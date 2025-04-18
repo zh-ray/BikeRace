@@ -29,31 +29,72 @@
         /* 字体加粗 */
     }
 
-    /* 小屏幕优化：隐藏表格，显示卡片 */
-    @media only screen and (max-width: 1034px) {
-        table {
-            display: none;
-            /* 隐藏表格 */
-        }
+    #toggleViewButton {
+        position: fixed;
+        /* 固定在屏幕上 */
+        top: 20px;
+        /* 距离顶部 20px */
+        right: 20px;
+        /* 距离右侧 20px */
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 1000;
+        /* 确保按钮在其他内容之上 */
+    }
 
-        .card-container {
-            display: block;
-            /* 显示卡片列表 */
-        }
+    /* 卡片样式 */
+    .card-container {
+        display: none;
+        /* 默认隐藏卡片容器 */
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .card h4 {
+        margin: 0 0 8px;
+        font-size: 16px;
+    }
+
+    .card p {
+        margin: 4px 0;
+        font-size: 14px;
     }
 </style>
 
+<div style="margin-bottom: 20px;">
+    <button id="toggleViewButton"
+        style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        切换到卡片视图
+    </button>
+</div>
+
 <div style="overflow-x: auto;">
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+    <table>
         <thead>
             <tr style="background-color: #f2f2f2;">
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事简称</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事名称</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事地点</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事时间</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">赛事里程</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">报名时间</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;"></th>
+                <th>赛事简称</th>
+                <th>赛事名称</th>
+                <th>赛事地点</th>
+                <th>赛事时间</th>
+                <th>赛事里程</th>
+                <th>报名时间</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -63,7 +104,7 @@
 </div>
 
 <!-- 卡片展示区域 -->
-<div class="card-container" style="display: none;"></div>
+<div class="card-container"></div>
 
 <h3 style="margin-top: 40px;">留言区域（如有补充，欢迎留言）</h3>
 <form id="feedbackForm" style="margin-top: 20px; font-family: Arial, sans-serif;" onsubmit="submitMessage(event)">

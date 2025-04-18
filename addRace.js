@@ -1,10 +1,52 @@
 // 等待 DOM 加载完成
 document.addEventListener('DOMContentLoaded', () => {
-    const tableBody = document.querySelector('table tbody');
-    if (!tableBody) {
-        console.error('未找到比赛日历表格的 tbody 元素');
+    const table = document.querySelector('table');
+    const tableBody = table.querySelector('tbody');
+    const cardContainer = document.querySelector('.card-container');
+    const toggleButton = document.getElementById('toggleViewButton');
+    let raceData = [];  // 用于存储比赛数据
+
+    if (!tableBody || !cardContainer) {
+        console.error('未找到表格或卡片容器元素');
         return;
     }
+
+    // 根据屏幕宽度设置默认视图
+    function setDefaultView() {
+        if (window.innerWidth < 1035) {
+            // 小于 1035px，显示卡片视图
+            table.style.display = 'none';
+            cardContainer.style.display = 'flex';
+            toggleButton.textContent = '切换到表格视图';
+            renderCards(raceData); // 渲染卡片
+        } else {
+            // 大于等于 1035px，显示表格视图
+            table.style.display = 'table';
+            cardContainer.style.display = 'none';
+            toggleButton.textContent = '切换到卡片视图';
+            renderTable(raceData); // 渲染表格
+        }
+    }
+
+    // 切换视图逻辑
+    toggleButton.addEventListener('click', () => {
+        if (table.style.display === 'none') {
+            // 显示表格，隐藏卡片
+            table.style.display = 'table';
+            cardContainer.style.display = 'none';
+            toggleButton.textContent = '切换到卡片视图';
+            renderTable(raceData); // 渲染表格
+        } else {
+            // 显示卡片，隐藏表格
+            table.style.display = 'none';
+            cardContainer.style.display = 'flex';
+            toggleButton.textContent = '切换到表格视图';
+            renderCards(raceData); // 渲染卡片
+        }
+    });
+
+    // 监听窗口大小变化，动态调整默认视图
+    window.addEventListener('resize', setDefaultView);
 
     // 定义一个函数，用于根据赛事类型返回对应的图标
     function getRaceIcon(raceType) {
@@ -78,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 比较当前时间与报名结束时间
         const now = new Date();
         const endDate = new Date(registrationEnd);
-        let isRegistrationOpen = false;
 
         if (now > endDate) {
             statusTd.textContent = '已截止';
@@ -86,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             statusTd.textContent = '报名中';
             statusTd.style.color = '#4CAF50'; // 绿色表示报名中
-            isRegistrationOpen = true; // 报名中状态
 
             // 如果报名中且有链接，添加“请点击”
             if (webUrl) {
@@ -108,111 +148,97 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 定义一个函数，用于加载 CSV 文件
     function loadCSV(filePath) {
-        return fetch(filePath)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`无法加载文件: ${response.statusText}`);
+        return fetch(filePath).then((response) => {
+            if (!response.ok) {
+                throw new Error(`无法加载文件: ${response.statusText}`);
+            }
+            return response.text();
+        }).then((csvData) => {
+            const rows = csvData.trim().split('\n'); // 按行分割
+            raceData = rows.slice(1).map((row) => { // 跳过第一行
+                const columns = row.split(','); // 按逗号分割列
+                if (columns.length >= 10) {
+                    return {
+                        shortName: columns[0].trim(),
+                        fullName: columns[1].trim(),
+                        location: columns[2].trim(),
+                        date: columns[3].trim(),
+                        distance: columns[4].trim(),
+                        registrationStart: columns[5].trim(),
+                        registrationEnd: columns[6].trim(),
+                        webUrl: columns[7] ? columns[7].trim() : null,
+                        roadStatus: columns[8] ? columns[8].trim() : '1',
+                        raceType: columns[9] ? columns[9].trim() : '1' // 赛事类型，默认为 1
+                    };
                 }
-                return response.text();
-            })
-            .then((csvData) => {
-                const rows = csvData.trim().split('\n'); // 按行分割
-                const raceData = rows.slice(1).map((row) => { // 跳过第一行
-                    const columns = row.split(','); // 按逗号分割列
-                    if (columns.length >= 10) {
-                        return {
-                            shortName: columns[0].trim(),
-                            fullName: columns[1].trim(),
-                            location: columns[2].trim(),
-                            date: columns[3].trim(),
-                            distance: columns[4].trim(),
-                            registrationStart: columns[5].trim(),
-                            registrationEnd: columns[6].trim(),
-                            webUrl: columns[7] ? columns[7].trim() : null,
-                            roadStatus: columns[8] ? columns[8].trim() : '1',
-                            raceType: columns[9] ? columns[9].trim() : '1' // 赛事类型，默认为 1
-                        };
-                    }
-                    return null;
-                }).filter((item) => item !== null); // 过滤掉无效数据
+                return null;
+            }).filter((item) => item !== null); // 过滤掉无效数据
 
-                // 排序规则：
-                // 1. 报名中在前，已截止在后
-                // 2. 同状态下按比赛日期从大到小排序
-                // 3. 比赛日期相同时，按报名开始日期从大到小排序
-                raceData.sort((a, b) => {
-                    const now = new Date();
-                    const aStatus = now > new Date(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
-                    const bStatus = now > new Date(b.registrationEnd) ? 1 : 0;
+            // 排序规则：
+            // 1. 报名中在前，已截止在后
+            // 2. 同状态下按比赛日期从大到小排序
+            // 3. 比赛日期相同时，按报名开始日期从大到小排序
+            raceData.sort((a, b) => {
+                const now = new Date();
+                const aStatus = now > new Date(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
+                const bStatus = now > new Date(b.registrationEnd) ? 1 : 0;
 
-                    if (aStatus !== bStatus) {
-                        return aStatus - bStatus; // 报名中在前
-                    }
+                if (aStatus !== bStatus) {
+                    return aStatus - bStatus; // 报名中在前
+                }
 
-                    // 同状态下按比赛日期从大到小排序
-                    const dateComparison = new Date(b.date) - new Date(a.date);
-                    if (dateComparison !== 0) {
-                        return dateComparison;
-                    }
+                // 同状态下按比赛日期从大到小排序
+                const dateComparison = new Date(b.date) - new Date(a.date);
+                if (dateComparison !== 0) {
+                    return dateComparison;
+                }
 
-                    // 比赛日期相同时，按报名开始日期从大到小排序
-                    return new Date(b.registrationStart) - new Date(a.registrationStart);
-                });
-
-                // 添加排序后的比赛条目到表格
-                raceData.forEach((race) => {
-                    addRace(
-                        race.shortName,
-                        race.fullName,
-                        race.location,
-                        race.date,
-                        race.distance,
-                        race.registrationStart,
-                        race.registrationEnd,
-                        race.webUrl,
-                        race.roadStatus,
-                        race.raceType
-                    );
-                });
-            })
-            .catch((error) => {
-                console.error('加载 CSV 文件时出错:', error);
+                // 比赛日期相同时，按报名开始日期从大到小排序
+                return new Date(b.registrationStart) - new Date(a.registrationStart);
             });
+
+            // 设置默认视图
+            setDefaultView();
+        }).catch((error) => {
+            console.error('加载 CSV 文件时出错:', error);
+        });
     }
 
-    // 定义一个函数，用于从表格生成卡片
-    function generateCardsFromTable() {
-        const tableRows = tableBody.querySelectorAll('tr');
-        const cardContainer = document.querySelector('.card-container');
+    // 定义一个函数，用于渲染表格
+    function renderTable(raceData) {
+        tableBody.innerHTML = ''; // 清空表格内容
+        raceData.forEach((race) => {
+            addRace(
+                race.shortName,
+                race.fullName,
+                race.location,
+                race.date,
+                race.distance,
+                race.registrationStart,
+                race.registrationEnd,
+                race.webUrl,
+                race.roadStatus,
+                race.raceType
+            );
+        });
+    }
 
-        if (!cardContainer) {
-            console.error('未找到卡片容器元素');
-            return;
-        }
-
-        // 清空卡片容器
-        cardContainer.innerHTML = '';
-
-        // 遍历表格行生成卡片
-        tableRows.forEach((row) => {
-            const columns = row.querySelectorAll('td');
+    // 定义一个函数，用于渲染卡片
+    function renderCards(raceData) {
+        cardContainer.innerHTML = ''; // 清空卡片内容
+        raceData.forEach((race) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.style.border = '1px solid #ddd';
-            card.style.padding = '16px';
-            card.style.margin = '8px';
-            card.style.borderRadius = '8px';
-            card.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
 
-            // 动态生成卡片内容
             card.innerHTML = `
-                <h4>${columns[0]?.textContent || '无数据'}</h4>
-                <p><strong>赛事名称:</strong> ${columns[1]?.textContent || '无数据'}</p>
-                <p><strong>赛事地点:</strong> ${columns[2]?.textContent || '无数据'}</p>
-                <p><strong>赛事时间:</strong> ${columns[3]?.textContent || '无数据'}</p>
-                <p><strong>赛事里程:</strong> ${columns[4]?.textContent || '无数据'}</p>
-                <p><strong>报名时间:</strong> ${columns[5]?.textContent || '无数据'}</p>
-                <p><strong>状态:</strong> ${columns[6]?.textContent || '无数据'}</p>
+                <h4>${race.shortName}</h4>
+                <p><strong>赛事名称:</strong> ${race.fullName}</p>
+                <p><strong>赛事地点:</strong> ${race.location}</p>
+                <p><strong>赛事时间:</strong> ${race.date}</p>
+                <p><strong>赛事里程:</strong> ${race.distance}</p>
+                <p><strong>报名时间:</strong> ${race.registrationStart}</p>
+                <p><strong>状态:</strong> ${new Date() > new Date(race.registrationEnd) ? '已截止' : '报名中'}</p>
+                ${race.webUrl ? `<p><a href="${race.webUrl}" target="_blank" style="color: #007BFF; text-decoration: none;">（请点击）</a></p>` : ''}
             `;
 
             cardContainer.appendChild(card);
@@ -220,8 +246,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 动态生成表格内容
-    loadCSV('./race.csv').then(() => {
-        // 表格内容生成完成后，生成卡片
-        generateCardsFromTable();
-    });
+    loadCSV('./race.csv');
 });
