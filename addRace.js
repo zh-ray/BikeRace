@@ -174,23 +174,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.text();
         }).then((csvData) => {
             const rows = csvData.trim().split('\n'); // 按行分割
-            raceData = rows.slice(1).map((row) => { // 跳过第一行
-                const columns = row.split(','); // 按逗号分割列
-                if (columns.length >= 10) {
-                    return {
-                        shortName: columns[0].trim(),
-                        fullName: columns[1].trim(),
-                        location: columns[2].trim(),
-                        date: columns[3].trim(),
-                        distance: columns[4].trim(),
-                        registrationStart: columns[5].trim(),
-                        registrationEnd: columns[6].trim(),
-                        webUrl: columns[7] ? columns[7].trim() : null,
-                        roadStatus: columns[8] ? columns[8].trim() : '1',
-                        raceType: columns[9] ? columns[9].trim() : '1' // 赛事类型，默认为 1
-                    };
+            const headers = rows[0].split(',').map((header) => header.trim()); // 获取标题行并去除多余空格
+
+            // 跳过第二行（注释行），从第三行开始解析数据
+            const dataRows = rows.slice(2);
+
+            // 将每一行数据映射为对象
+            raceData = dataRows.map((row) => {
+                const columns = row.split(',').map((col) => col.trim()); // 按逗号分割列并去除多余空格
+                if (columns.length !== headers.length) {
+                    console.warn('数据列数与标题列数不匹配，跳过该行:', row);
+                    return null;
                 }
-                return null;
+
+                // 将列数据映射为对象
+                const race = {};
+                headers.forEach((header, index) => {
+                    race[header] = columns[index];
+                });
+
+                return race;
             }).filter((item) => item !== null); // 过滤掉无效数据
 
             // 排序规则：
