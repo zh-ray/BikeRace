@@ -58,6 +58,41 @@ document.addEventListener('DOMContentLoaded', () => {
         return '🚴'; // 普通赛事（默认）
     }
 
+    function getRoadStatusStyle(roadStatus) {
+        let roadStatusText = '全封闭道路';
+        let roadStatusColor = '#f44336';
+
+        if (roadStatus === '2') {
+            roadStatusText = '半封闭道路';
+            roadStatusColor = '#FF9800'; // 橙色
+        } else if (roadStatus === '3') {
+            roadStatusText = '无封闭道路';
+            roadStatusColor = '#4CAF50'; // 绿色
+        }
+
+        return { text: roadStatusText, color: roadStatusColor };
+    }
+
+    function getRegistrationStatus(registrationStart, registrationEnd, webUrl) {
+        const now = new Date();
+        const startDate = registrationStart !== '-' ? new Date(registrationStart) : null;
+        const endDate = registrationEnd !== '-' ? new Date(registrationEnd) : null;
+
+        if (registrationStart === '-' || registrationEnd === '-') {
+            // 如果报名时间为 '-'，显示待报名
+            return { text: '待报名', color: '#FF9800', link: null };
+        } else if (now < startDate) {
+            // 报名时间未到
+            return { text: '待报名', color: '#FF9800', link: null };
+        } else if (now > endDate) {
+            // 报名已截止
+            return { text: '已截止', color: '#f44336', link: null };
+        } else {
+            // 报名中
+            return { text: '报名中', color: '#4CAF50', link: webUrl };
+        }
+    }
+
     // 定义一个函数，用于添加比赛条目
     function addRace(shortName, fullName, location, date, distance, registrationStart, registrationEnd, webUrl, roadStatus, raceType) {
         const newRow = document.createElement('tr');
@@ -87,18 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const raceIcon = getRaceIcon(raceType);
 
         // 设置封路状态颜色
-        let roadStatusText = '';
-        let roadStatusColor = '';
-        if (roadStatus === '1') {
-            roadStatusText = '全封闭道路';
-            roadStatusColor = '#f44336'; // 红色
-        } else if (roadStatus === '2') {
-            roadStatusText = '半封闭道路';
-            roadStatusColor = '#FF9800'; // 橙色
-        } else if (roadStatus === '3') {
-            roadStatusText = '无封闭道路';
-            roadStatusColor = '#4CAF50'; // 绿色
-        }
+        const { text: roadStatusText, color: roadStatusColor } = getRoadStatusStyle(roadStatus);
 
         // 将图标、里程和封路状态组合到一起
         distanceTd.innerHTML = `${raceIcon} ${distance} <span style="color: ${roadStatusColor}; font-weight: bold;">(${roadStatusText})</span>`;
@@ -111,33 +135,28 @@ document.addEventListener('DOMContentLoaded', () => {
         registrationTd.textContent = registrationStart;
         newRow.appendChild(registrationTd);
 
-        // 创建是否截至报名列
+        // 创建是否截止报名列
         const statusTd = document.createElement('td');
         statusTd.style.border = '1px solid #ddd';
         statusTd.style.padding = '8px';
         statusTd.style.textAlign = 'center';
 
-        // 比较当前时间与报名结束时间
-        const now = new Date();
-        const endDate = new Date(registrationEnd);
+        // 获取报名状态
+        const { text: statusText, color: statusColor, link } = getRegistrationStatus(registrationStart, registrationEnd, webUrl);
 
-        if (now > endDate) {
-            statusTd.textContent = '已截止';
-            statusTd.style.color = '#f44336'; // 红色表示已截止
-        } else {
-            statusTd.textContent = '报名中';
-            statusTd.style.color = '#4CAF50'; // 绿色表示报名中
+        // 设置状态文本和颜色
+        statusTd.textContent = statusText;
+        statusTd.style.color = statusColor;
 
-            // 如果报名中且有链接，添加“请点击”
-            if (webUrl) {
-                const link = document.createElement('a');
-                link.href = webUrl;
-                link.textContent = '（请点击）';
-                link.target = '_blank'; // 在新标签页中打开链接
-                link.style.color = '#007BFF'; // 设置链接颜色
-                link.style.textDecoration = 'none'; // 去掉下划线
-                statusTd.appendChild(link);
-            }
+        // 如果有链接且状态为报名中，添加链接
+        if (link) {
+            const anchor = document.createElement('a');
+            anchor.href = link;
+            anchor.textContent = '（请点击）';
+            anchor.target = '_blank'; // 在新标签页中打开链接
+            anchor.style.color = '#007BFF'; // 设置链接颜色
+            anchor.style.textDecoration = 'none'; // 去掉下划线
+            statusTd.appendChild(anchor);
         }
 
         newRow.appendChild(statusTd);
@@ -230,17 +249,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'card';
 
+            // 获取赛事类型图标
+            const raceIcon = getRaceIcon(race.raceType);
+
+            // 获取封路状态文本和颜色
+            const { text: roadStatusText, color: roadStatusColor } = getRoadStatusStyle(race.roadStatus);// 获取报名状态
+            const { text: statusText, color: statusColor, link } = getRegistrationStatus(race.registrationStart, race.registrationEnd, race.webUrl);
+
+            if (link) {
+                const anchor = document.createElement('a');
+                anchor.href = link;
+                anchor.textContent = '（请点击）';
+                anchor.target = '_blank'; // 在新标签页中打开链接
+                anchor.style.color = '#007BFF'; // 设置链接颜色
+                anchor.style.textDecoration = 'none'; // 去掉下划线
+            }
+
             card.innerHTML = `
                 <h4>${race.shortName}</h4>
                 <p><strong>赛事名称:</strong> ${race.fullName}</p>
                 <p><strong>赛事地点:</strong> ${race.location}</p>
                 <p><strong>赛事时间:</strong> ${race.date}</p>
-                <p><strong>赛事里程:</strong> ${race.distance}</p>
+                <p><strong>赛事里程:</strong> ${raceIcon} ${race.distance} <span style="color: ${roadStatusColor}; font-weight: bold;">(${roadStatusText})</span></p>
                 <p><strong>报名时间:</strong> ${race.registrationStart}</p>
-                <p><strong>状态:</strong> ${new Date() > new Date(race.registrationEnd) ? '已截止' : '报名中'}</p>
-                ${race.webUrl ? `<p><a href="${race.webUrl}" target="_blank" style="color: #007BFF; text-decoration: none;">（请点击）</a></p>` : ''}
+                <p><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span></p>
             `;
 
+            // 如果有链接且状态为报名中，添加链接
+            if (link) {
+                const anchor = document.createElement('a');
+                anchor.href = link;
+                anchor.textContent = '（请点击）';
+                anchor.target = '_blank'; // 在新标签页中打开链接
+                anchor.style.color = '#007BFF'; // 设置链接颜色
+                anchor.style.textDecoration = 'none'; // 去掉下划线
+
+                // 将链接追加到状态段落中
+                const statusParagraph = card.querySelector('p:last-child');
+                statusParagraph.appendChild(anchor);
+            }
             cardContainer.appendChild(card);
         });
     }
