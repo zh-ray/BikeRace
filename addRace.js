@@ -75,10 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRegistrationStatus(registrationStart, registrationEnd, webUrl) {
         const now = new Date();
-        const startDate = registrationStart !== '-' ? new Date(registrationStart) : null;
-        const endDate = registrationEnd !== '-' ? new Date(registrationEnd) : null;
+        const startDate = registrationStart !== '-' && registrationStart !== 'cancel' ? new Date(registrationStart) : null;
+        const endDate = registrationEnd !== '-' && registrationEnd !== 'cancel' ? new Date(registrationEnd) : null;
 
-        if (registrationStart === '-' || registrationEnd === '-') {
+        if (registrationStart === 'cancel' || registrationEnd === 'cancel') {
+            // 如果报名时间为 'cancel'，显示已取消
+            return { text: '已取消', color: '#9E9E9E', link: null }; // 灰色表示已取消
+        } else if (registrationStart === '-' || registrationEnd === '-') {
             // 如果报名时间为 '-'，显示待报名
             return { text: '待报名', color: '#FF9800', link: null };
         } else if (now < startDate) {
