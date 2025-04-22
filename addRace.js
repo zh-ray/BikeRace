@@ -229,10 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let currentPage = 1; // 当前页码
+    const rowsPerPage = 20; // 每页显示的行数
+
     // 定义一个函数，用于渲染表格
     function renderTable(raceData) {
         tableBody.innerHTML = ''; // 清空表格内容
-        raceData.forEach((race) => {
+
+        // 计算分页数据
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const pageData = raceData.slice(startIndex, endIndex);
+
+        pageData.forEach((race) => {
             addRace(
                 race.shortName,
                 race.fullName,
@@ -246,12 +255,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 race.raceType
             );
         });
+
+        // 渲染分页控件
+        renderPagination(raceData.length);
     }
 
     // 定义一个函数，用于渲染卡片
     function renderCards(raceData) {
         cardContainer.innerHTML = ''; // 清空卡片内容
-        raceData.forEach((race) => {
+
+        // 计算分页数据
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const pageData = raceData.slice(startIndex, endIndex);
+
+        pageData.forEach((race) => {
             const card = document.createElement('div');
             card.className = 'card';
 
@@ -261,15 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // 获取封路状态文本和颜色
             const { text: roadStatusText, color: roadStatusColor } = getRoadStatusStyle(race.roadStatus);// 获取报名状态
             const { text: statusText, color: statusColor, link } = getRegistrationStatus(race.registrationStart, race.registrationEnd, race.webUrl);
-
-            if (link) {
-                const anchor = document.createElement('a');
-                anchor.href = link;
-                anchor.textContent = '（请点击）';
-                anchor.target = '_blank'; // 在新标签页中打开链接
-                anchor.style.color = '#007BFF'; // 设置链接颜色
-                anchor.style.textDecoration = 'none'; // 去掉下划线
-            }
 
             card.innerHTML = `
                 <h4>${race.shortName}</h4>
@@ -296,6 +305,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             cardContainer.appendChild(card);
         });
+
+        // 渲染分页控件
+        renderPagination(raceData.length);
+    }
+
+    function renderPagination(totalRows) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = ''; // 清空分页内容
+
+        const totalPages = Math.ceil(totalRows / rowsPerPage); // 总页数
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.style.margin = '0 5px';
+            pageButton.style.padding = '5px 10px';
+            pageButton.style.border = '1px solid #ddd';
+            pageButton.style.backgroundColor = i === currentPage ? '#007BFF' : '#fff';
+            pageButton.style.color = i === currentPage ? '#fff' : '#000';
+            pageButton.style.cursor = 'pointer';
+
+            // 添加点击事件
+            pageButton.addEventListener('click', () => {
+                currentPage = i;
+                if (table.style.display === 'none') {
+                    renderCards(raceData); // 渲染卡片
+                } else {
+                    renderTable(raceData); // 渲染表格
+                }
+            });
+
+            paginationContainer.appendChild(pageButton);
+        }
     }
 
     // 动态生成表格内容
