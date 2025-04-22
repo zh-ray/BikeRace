@@ -83,10 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return { text: '已取消', color: '#9E9E9E', link: null }; // 灰色表示已取消
         } else if (registrationStart === '-' || registrationEnd === '-') {
             // 如果报名时间为 '-'，显示待报名
-            return { text: '待报名', color: '#FF9800', link: null };
+            return { text: '待报名', color: '#FF9800', link: webUrl !== '/' ? webUrl : null };
         } else if (now < startDate) {
             // 报名时间未到
-            return { text: '待报名', color: '#FF9800', link: null };
+            return { text: '待报名', color: '#FF9800', link: webUrl !== '/' ? webUrl : null };
         } else if (now > endDate) {
             // 报名已截止
             return { text: '已截止', color: '#f44336', link: null };
