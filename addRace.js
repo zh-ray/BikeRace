@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 渲染分页控件
-        renderPagination(raceData.length);
+        renderPagination(raceData.length, rowsPerPage);
     }
 
     // 定义一个函数，用于渲染卡片
@@ -307,16 +307,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 渲染分页控件
-        renderPagination(raceData.length);
+        renderPagination(raceData.length, rowsPerPage);
     }
 
-    function renderPagination(totalRows) {
+    function renderPagination(totalRows, itemsPerPage) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = ''; // 清空分页内容
 
-        const totalPages = Math.ceil(totalRows / rowsPerPage); // 总页数
+        const totalPages = Math.ceil(totalRows / itemsPerPage); // 总页数
+        const maxVisiblePages = 5; // 最大显示的页码数量
+        const halfVisible = Math.floor(maxVisiblePages / 2);
 
-        for (let i = 1; i <= totalPages; i++) {
+        // 添加“上一页”按钮
+        if (currentPage > 1) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '上一页';
+            prevButton.style.margin = '0 5px';
+            prevButton.style.padding = '5px 10px';
+            prevButton.style.border = '1px solid #ddd';
+            prevButton.style.cursor = 'pointer';
+            prevButton.addEventListener('click', () => {
+                currentPage--;
+                updateView();
+            });
+            paginationContainer.appendChild(prevButton);
+        }
+
+        // 计算页码范围
+        let startPage = Math.max(1, currentPage - halfVisible);
+        let endPage = Math.min(totalPages, currentPage + halfVisible);
+
+        // 如果页码不足最大显示数量，调整范围
+        if (currentPage <= halfVisible) {
+            endPage = Math.min(totalPages, maxVisiblePages);
+        } else if (currentPage + halfVisible > totalPages) {
+            startPage = Math.max(1, totalPages - maxVisiblePages + 1);
+        }
+
+        // 添加页码按钮
+        for (let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement('button');
             pageButton.textContent = i;
             pageButton.style.margin = '0 5px';
@@ -329,14 +358,34 @@ document.addEventListener('DOMContentLoaded', () => {
             // 添加点击事件
             pageButton.addEventListener('click', () => {
                 currentPage = i;
-                if (table.style.display === 'none') {
-                    renderCards(raceData); // 渲染卡片
-                } else {
-                    renderTable(raceData); // 渲染表格
-                }
+                updateView();
             });
 
             paginationContainer.appendChild(pageButton);
+        }
+
+        // 添加“下一页”按钮
+        if (currentPage < totalPages) {
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '下一页';
+            nextButton.style.margin = '0 5px';
+            nextButton.style.padding = '5px 10px';
+            nextButton.style.border = '1px solid #ddd';
+            nextButton.style.cursor = 'pointer';
+            nextButton.addEventListener('click', () => {
+                currentPage++;
+                updateView();
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+    }
+
+    // 更新视图（表格或卡片）
+    function updateView() {
+        if (table.style.display === 'none') {
+            renderCards(raceData); // 渲染卡片
+        } else {
+            renderTable(raceData); // 渲染表格
         }
     }
 
