@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const startDate = registrationStart !== '-' && registrationStart !== 'cancel' ? new Date(registrationStart) : null;
         const endDate = registrationEnd !== '-' && registrationEnd !== 'cancel' ? new Date(registrationEnd) : null;
 
+        const sixHoursInMs = 6 * 60 * 60 * 1000; // 6 小时的毫秒数
+
         if (registrationStart === 'cancel' || registrationEnd === 'cancel') {
             // 如果报名时间为 'cancel'，显示已取消
             return { text: '已取消', color: '#9E9E9E', link: null }; // 灰色表示已取消
@@ -86,13 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return { text: '待报名', color: '#FF9800', link: webUrl !== '/' ? webUrl : null };
         } else if (now < startDate) {
             // 报名时间未到
-            return { text: '待报名', color: '#FF9800', link: webUrl !== '/' ? webUrl : null };
+            const timeToStart = startDate - now;
+            const statusText = timeToStart <= sixHoursInMs ? '即将开始' : '待报名';
+            const statusColor = timeToStart <= sixHoursInMs ? '#0AEE12' : '#FF9800'; // 红橙色提醒
+            return { text: statusText, color: statusColor, link: webUrl !== '/' ? webUrl : null };
         } else if (now > endDate) {
             // 报名已截止
-            return { text: '已截止', color: '#f44336', link: null };
+            return { text: '已截止', color: '#9E9E9E', link: null };
         } else {
             // 报名中
-            return { text: '报名中', color: '#4CAF50', link: webUrl };
+            const timeToEnd = endDate - now;
+            const statusText = timeToEnd <= sixHoursInMs ? '即将结束' : '正在报名';
+            statusColor = timeToEnd <= sixHoursInMs ? '#FF4500' : '#4CAF50'; // 红橙色提醒
+            return { text: statusText, color: statusColor, link: webUrl };
         }
     }
 
@@ -197,7 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 return race;
-            }).filter((item) => item !== null); // 过滤掉无效数据
+            }).filter((item) => {
+                if (!item) return false;
+
+                // 过滤掉比赛日期已过的比赛
+                const now = new Date();
+                const raceDate = new Date(item.date);
+                return raceDate >= now;
+            }); // 过滤掉无效数据和过期比赛
 
             // 排序规则：
             // 1. 报名中在前，已截止在后
