@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 过滤掉比赛日期已过的比赛
                 const now = new Date();
-                const raceDate = new Date(item.date);
+                const raceDate = new Date(item.date.replace(/\./g, '-')); // 将 "YYYY.MM.DD" 转换为 "YYYY-MM-DD";
                 return raceDate >= now;
             }); // 过滤掉无效数据和过期比赛
 
