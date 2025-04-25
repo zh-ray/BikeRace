@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRegistrationStatus(registrationStart, registrationEnd, webUrl) {
         const now = new Date();
-        const startDate = registrationStart !== '-' && registrationStart !== 'cancel' ? new Date(registrationStart) : null;
-        const endDate = registrationEnd !== '-' && registrationEnd !== 'cancel' ? new Date(registrationEnd) : null;
+        const startDate = registrationStart !== '-' && registrationStart !== 'cancel' ? toISODate(registrationStart) : null;
+        const endDate = registrationEnd !== '-' && registrationEnd !== 'cancel' ? toISODate(registrationEnd) : null;
 
         const sixHoursInMs = 6 * 60 * 60 * 1000; // 6 小时的毫秒数
 
@@ -102,6 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
             statusColor = timeToEnd <= sixHoursInMs ? '#FF4500' : '#4CAF50'; // 红橙色提醒
             return { text: statusText, color: statusColor, link: webUrl };
         }
+    }
+
+    // 定义一个函数，将日期转换为 ISO 8601 标准格式
+    function toISODate(dateString) {
+        // 将日期字符串中的 "." 替换为 "-"，以支持 Safari 的日期解析
+        const formattedDate = dateString.replace(/\./g, '-');
+        // 返回 ISO 8601 格式的日期
+        return new Date(formattedDate);
     }
 
     // 定义一个函数，用于添加比赛条目
@@ -210,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 过滤掉比赛日期已过的比赛
                 const now = new Date();
-                const raceDate = new Date(item.date.replace(/\./g, '-')); // 将 "YYYY.MM.DD" 转换为 "YYYY-MM-DD";
+                const raceDate = toISODate(item.date); // 将 "YYYY.MM.DD" 转换为 "YYYY-MM-DD";
                 return raceDate >= now;
             }); // 过滤掉无效数据和过期比赛
 
@@ -220,21 +228,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. 比赛日期相同时，按报名开始日期从大到小排序
             raceData.sort((a, b) => {
                 const now = new Date();
-                const aStatus = now > new Date(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
-                const bStatus = now > new Date(b.registrationEnd) ? 1 : 0;
+                const aStatus = now > toISODate(a.registrationEnd) ? 1 : 0; // 1 表示已截止，0 表示报名中
+                const bStatus = now > toISODate(b.registrationEnd) ? 1 : 0;
 
                 if (aStatus !== bStatus) {
                     return aStatus - bStatus; // 报名中在前
                 }
 
                 // 同状态下按比赛日期从大到小排序
-                const dateComparison = new Date(b.date) - new Date(a.date);
+                const dateComparison = toISODate(b.date) - toISODate(a.date);
                 if (dateComparison !== 0) {
                     return dateComparison;
                 }
 
                 // 比赛日期相同时，按报名开始日期从大到小排序
-                return new Date(b.registrationStart) - new Date(a.registrationStart);
+                return toISODate(b.registrationStart) - toISODate(a.registrationStart);
             });
 
             // 设置默认视图
