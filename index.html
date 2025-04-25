@@ -130,12 +130,8 @@
                 body,
             });
 
-            if (response.ok) {
-                alert('留言已成功提交！');
-                document.getElementById('feedbackForm').reset();
-            } else {
-                alert('提交失败，请稍后再试。');
-            }
+            alert('留言已提交！');
+            document.getElementById('feedbackForm').reset();
         } catch (error) {
             console.error('Error:', error);
             alert('提交失败，请稍后再试。');
