@@ -7,75 +7,9 @@
     *具体赛事章程以官方为准,补录名额请关注赛事官方通知
 </p>
 
-<style>
-    /* 表格样式 */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: Arial, sans-serif;
-    }
-
-    th,
-    td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-
-    /* 首列加粗字体 */
-    th:first-child,
-    td:first-child {
-        font-weight: bold;
-        /* 字体加粗 */
-    }
-
-    #toggleViewButton {
-        position: fixed;
-        /* 固定在屏幕上 */
-        top: 20px;
-        /* 距离顶部 20px */
-        right: 20px;
-        /* 距离右侧 20px */
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        z-index: 1000;
-        /* 确保按钮在其他内容之上 */
-    }
-
-    /* 卡片样式 */
-    .card-container {
-        display: none;
-        /* 默认隐藏卡片容器 */
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-top: 20px;
-        font-family: Arial, sans-serif;
-    }
-
-    .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 16px;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .card h4 {
-        margin: 0 0 8px;
-        font-size: 16px;
-    }
-
-    .card p {
-        margin: 4px 0;
-        font-size: 14px;
-    }
-</style>
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
 
 <div style="margin-bottom: 20px;">
     <button id="toggleViewButton"
